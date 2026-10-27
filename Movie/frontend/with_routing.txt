@@ -1,0 +1,179 @@
+npm install vue-router
+
+src/
+├── components/
+│   ├── Booking.vue
+│   └── Home.vue
+├── App.vue
+├── router.js
+└── main.js
+
+-----------------------------
+router.js
+
+import { createRouter, createWebHistory } from 'vue-router'
+import Home from './components/Home.vue'
+import Booking from './components/Booking.vue'
+
+const routes = [
+  {
+    path: '/',
+    component: Home
+  },
+  {
+    path: '/bookings',
+    name: 'bookings',
+    component: Booking
+  }
+]
+
+export default createRouter({
+  history: createWebHistory(),
+  routes
+})
+-------------------------------
+
+main.js
+
+import { createApp } from 'vue'
+import App from './App.vue'
+import router from './router'
+
+createApp(App).use(router).mount('#app')
+------------------------------
+
+App.vue
+
+<script setup>
+import { ref, onMounted } from 'vue'
+import { RouterLink, RouterView } from 'vue-router'
+
+const bookings = ref([])
+
+async function getBookings() {
+  const response = await fetch('http://localhost:8080/api/bookings')
+  bookings.value = await response.json()
+}
+
+onMounted(getBookings)
+</script>
+
+<template>
+  <div class="app">
+    <h1>Movie Booking System</h1>
+
+    <RouterLink to="/bookings" class="btn">
+      View Bookings
+    </RouterLink>
+
+    <RouterView v-slot="{ Component, route }">
+      <component
+        v-if="route.name === 'bookings'"
+        :is="Component"
+        :bookings="bookings"
+      />
+      <component
+        v-else
+        :is="Component"
+      />
+    </RouterView>
+  </div>
+</template>
+
+<style>
+.app {
+  max-width: 1000px;
+  margin: 30px auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.btn {
+  display: inline-block;
+  padding: 10px 18px;
+  margin-bottom: 20px;
+  background: white;
+  color: black;
+  border: 1px solid black;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.btn:hover {
+  background: royalblue;
+  color: white;
+  font-weight: bold;
+}
+</style>
+-------------------------------
+
+Home.vue
+
+<template>
+  <p>Click View Bookings to display all booking records.</p>
+</template>
+
+----------------------------
+
+Booking.vue
+
+<script setup>
+const props = defineProps({
+  bookings: {
+    type: Array,
+    default: () => []
+  }
+})
+</script>
+
+<template>
+  <h2>All Bookings</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Booking ID</th>
+        <th>Movie ID</th>
+        <th>Customer</th>
+        <th>Tickets</th>
+        <th>Price</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr v-for="b in props.bookings" :key="b.id">
+        <td>{{ b.id }}</td>
+        <td>{{ b.movieId }}</td>
+        <td>{{ b.customerName }}</td>
+        <td>{{ b.numberOfTickets }}</td>
+        <td>{{ b.price }}</td>
+        <td>{{ b.status }}</td>
+      </tr>
+    </tbody>
+  </table>
+</template>
+
+<style scoped>
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
+}
+
+th {
+  background: #eeeeee;
+}
+
+tbody tr:hover {
+  background: #e6efff;
+  font-weight: bold;
+}
+</style>
