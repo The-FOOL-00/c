@@ -1,0 +1,55 @@
+App.vue
+-----------------
+<script setup>
+import Booking from './components/Booking.vue'
+</script>
+
+<template>
+  <h1>Movie Booking System</h1>
+  <Booking />
+</template>
+
+  ----------------------
+
+  Booking.vue
+  ---------------------
+  <script setup>
+import { ref, onMounted } from 'vue'
+
+const bookings = ref([])
+
+async function getBookings() {
+  const response = await fetch('http://localhost:8080/api/bookings')
+  bookings.value = await response.json()
+}
+
+onMounted(getBookings)
+</script>
+
+<template>
+  <h2>All Bookings</h2>
+
+  <table border="1" cellpadding="8">
+    <thead>
+      <tr>
+        <th>Booking ID</th>
+        <th>Movie ID</th>
+        <th>Customer Name</th>
+        <th>Tickets</th>
+        <th>Price</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr v-for="b in bookings" :key="b.id">
+        <td>{{ b.id }}</td>
+        <td>{{ b.movieId }}</td>
+        <td>{{ b.customerName }}</td>
+        <td>{{ b.numberOfTickets }}</td>
+        <td>{{ b.price }}</td>
+        <td>{{ b.status }}</td>
+      </tr>
+    </tbody>
+  </table>
+</template>
