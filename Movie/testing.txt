@@ -1,0 +1,146 @@
+4. Test everything using Postman
+Start MongoDB and your Spring Boot application first. The examples below assume the backend is running on port 8080.
+
+Base URL:
+http://localhost:8080
+
+
+For each POST and PUT request containing JSON, choose Body → raw → JSON in Postman.
+Test 1 — Add a movie (POST)
+Method: POST
+
+URL:
+http://localhost:8080/api/movies
+
+
+Body:
+{
+  "title": "Leo",
+  "totalSeats": 100,
+  "availableSeats": 35
+}
+
+
+Copy the returned id. You'll need it for booking requests.
+
+Now add a second movie to test the available-seats API.
+
+Method: POST
+
+URL:
+http://localhost:8080/api/movies
+
+
+Body:
+{
+  "title": "Dune",
+  "totalSeats": 200,
+  "availableSeats": 0
+}
+
+
+Test 2 — Get all movies (GET)
+GET http://localhost:8080/api/movies
+
+
+You should see both movies.
+Test 3 — Update a movie (PUT)
+Replace {movieId} with the actual ID returned by MongoDB.
+PUT http://localhost:8080/api/movies/{movieId}
+
+
+Body:
+{
+  "title": "Leo Updated",
+  "totalSeats": 120,
+  "availableSeats": 50
+}
+
+
+Then repeat GET /api/movies to check that the movie was updated.
+Test 4 — Add a booking (POST)
+Method: POST
+
+URL:
+POST http://localhost:8080/api/bookings
+
+
+Body — replace YOUR_LEO_MOVIE_ID with Leo's real ID:
+{
+  "movieId": "YOUR_LEO_MOVIE_ID",
+  "customerName": "Arun",
+  "numberOfTickets": 2,
+  "price": 400
+}
+
+
+The service should set the status to booked. Copy the returned booking id.
+Test 5 — Add a second booking for the same movie
+Submit another POST to /api/bookings with the same movie ID:
+{
+  "movieId": "YOUR_LEO_MOVIE_ID",
+  "customerName": "Priya",
+  "numberOfTickets": 3,
+  "price": 600
+}
+
+
+Copy this booking's ID too.
+Test 6 — Display the Booking collection (GET)
+GET http://localhost:8080/api/bookings
+
+
+You should see both bookings, including their IDs, movie IDs, customers, ticket counts, prices, and statuses.
+Test 7 — Update a booking (PUT)
+Use the first booking's ID:
+PUT http://localhost:8080/api/bookings/{bookingId}
+
+
+Body:
+{
+  "movieId": "YOUR_LEO_MOVIE_ID",
+  "customerName": "Arun Kumar",
+  "numberOfTickets": 4,
+  "price": 800,
+  "status": "booked"
+}
+
+
+Repeat GET /api/bookings to verify the update.
+Test 8 — Toggle booking status using the booking ID (PUT)
+URL:
+PUT http://localhost:8080/api/bookings/{bookingId}/status
+
+
+Choose Body → none. No request body is needed.
+
+This changes the status from booked to cancel. Send the same request again to change it back to booked.
+
+Verify it using:
+GET http://localhost:8080/api/bookings
+
+
+Test 9 — Display unique booked movies (GET)
+GET http://localhost:8080/api/movies/booked
+
+
+Expected result: Leo appears only once, despite having two bookings. The second booking does not create a duplicate movie entry.
+
+For another test, toggle the status of one Leo booking to cancel. Leo should still appear because the other booking is active. Cancel both bookings, and Leo should disappear from this API's results.
+Test 10 — Display movies with available seats (GET)
+GET http://localhost:8080/api/movies/available
+
+
+Expected result: Leo appears because it has 35 available seats; Dune does not appear because it has zero available seats.
+
+This API checks the stored availableSeats field. The current code does not automatically subtract tickets when a booking is created.
+Test 11 — Delete a booking (DELETE)
+DELETE http://localhost:8080/api/bookings/{bookingId}
+
+
+Then call GET /api/bookings to verify that the deleted booking is gone. Repeat with the other booking if needed.
+Test 12 — Delete a movie (DELETE)
+DELETE http://localhost:8080/api/movies/{movieId}
+
+
+Then call GET /api/movies to check that the movie has been deleted.
