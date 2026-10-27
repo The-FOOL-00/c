@@ -1,0 +1,114 @@
+App.vue
+----------------------------
+<script setup>
+import { ref } from 'vue'
+import Booking from './components/Booking.vue'
+
+const bookings = ref([])
+const showBookings = ref(false)
+
+async function toggleBookings() {
+  showBookings.value = !showBookings.value
+
+  if (showBookings.value) {
+    const response = await fetch('http://localhost:8080/api/bookings')
+    bookings.value = await response.json()
+  }
+}
+</script>
+
+<template>
+  <h1>Movie Booking System</h1>
+
+  <button class="btn" @click="toggleBookings">
+    {{ showBookings ? 'Hide Bookings' : 'View Bookings' }}
+  </button>
+
+  <Booking
+    v-if="showBookings"
+    :bookings="bookings"
+  />
+</template>
+
+<style>
+.btn {
+  padding: 10px 18px;
+  background: white;
+  color: black;
+  border: 1px solid black;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn:hover {
+  background: royalblue;
+  color: white;
+  font-weight: bold;
+}
+</style>
+
+-----------------------------
+
+Booking.vue
+-------------------------
+
+<script setup>
+defineProps({
+  bookings: {
+    type: Array,
+    default: () => []
+  }
+})
+</script>
+
+<template>
+  <h2>All Bookings</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Booking ID</th>
+        <th>Movie ID</th>
+        <th>Customer</th>
+        <th>Tickets</th>
+        <th>Price</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr v-for="b in bookings" :key="b.id">
+        <td>{{ b.id }}</td>
+        <td>{{ b.movieId }}</td>
+        <td>{{ b.customerName }}</td>
+        <td>{{ b.numberOfTickets }}</td>
+        <td>{{ b.price }}</td>
+        <td>{{ b.status || 'booked' }}</td>
+      </tr>
+    </tbody>
+  </table>
+</template>
+
+<style scoped>
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
+}
+
+th {
+  background: #eee;
+}
+
+tbody tr:hover {
+  background: #e6efff;
+  font-weight: bold;
+}
+</style>
